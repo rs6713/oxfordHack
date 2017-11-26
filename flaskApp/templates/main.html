@@ -3,12 +3,22 @@
         <title>Graph page</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <!--
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>-->
         <!-- Plotly.js -->
           <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
           <style>
+              body{
+                max-height:100vh;
+                max-width:100%;
+                margin:0;
+                width:100%;
+                height:100vh;
+                display:block;
+              }
                 button {
                 background-color: white; /* Green */
                 border: none;
@@ -19,10 +29,39 @@
                 display: inline-block;
                 font-size: 16px;
                 border-radius: 12px;
+               
                 }
                 #button1{background-color: rgba(0, 0, 255, 0.3);}
                 #button2{background-color: rgba(0, 255, 0, 0.3);}
                 #button3{background-color: rgba(255, 0, 0, 0.3);}
+                .modebar{
+                      display: none !important;
+                }
+                #header{
+                  width:100%;
+                  padding: 1vh 10%;
+                  box-sizing:border-box;
+                  height:10vh;
+                  text-align:left;
+                }
+                #mainBody{
+                  width:100%;
+                  display:block;
+                  height:90vh;
+                }
+                #header img{
+                  height:100%;
+                }
+                #underline{
+                  width:100%;
+                  height:10px;
+                }
+                #contained{
+                  margin: 0;
+                  padding: 0;
+                  vertical-align:top;
+                }
+
           </style>
     </head>
      <!-- JAVASCRIPT CODE GOES HERE 
@@ -33,32 +72,44 @@
     -->
 
     <body>
-
-        <div style="background:#e5feff !important" class="jumbotron jumbotron-fluid">
-            <div class="container">
-                <center><img src="../static/assets/LINGO3.png" alt="Logo" style="width:330px;height:202px;"></center>
-            </div>
+        <div style="background:#e5feff " id="header">
+          <img src="../static/assets/LINGO3.png" alt="Logo" >
         </div>
-        <div style="margin: auto; width: 50%;">
-        <div id="myDiv"><!-- Plotly chart will be drawn inside this DIV --></div>
-    
-            <div style="margin: auto; width: 55%;">
-                <button onclick="drawPlot(graphX, spellings, 'rgb(255, 0, 0)')" id="button1">Overall</button>
-                <button onclick="drawPlot(graphX, spellings, 'rgb(0, 255, 0)')" id="button2">Grammar</button>
-                <button onclick="drawPlot(graphX, spellings, 'rgb(0, 0, 255)')" id="button3">Spelling</button> 
+        <div id="mainBody">
+          <div style="width: 45%; display:inline-block;height:100%" class="contained">
+            <div id="myDiv">
+              <!-- Plotly chart will be drawn inside this DIV -->
             </div>
-            <div id="howarefriends" style="margin: auto; width: 40%;">
-              <button onclick="enterfriendFunction()" id="button4" >How are my friends doing?</button>
-            </div>
-            <div id="twitterfriend" style="display:none">
-              <form >
-              Twitter Handle:
-              <input type="text" name="handle">
-              <input type="submit" value="Submit" onclick="compareFunction()" id="button5">
-              </form>
-            </div>
+      
+              <div style="text-align:center">
+                  <span style="margin:auto">
+                  <button onclick="drawOverall(graphX, spellings,languages, 'rgba(0, 0, 255, 0.3)')" id="button1">Overall</button>
+                  <button onclick="drawLanguages(graphX, languages, 'rgba(0, 255, 0, 0.3)')" id="button2">Languages</button>
+                  <button onclick="drawPlot(graphX, spellings, 'rgba(255, 0, 0, 0.3)')" id="button3">Spelling</button> 
+                  <span>
+              </div>
           </div>
+          <div style="width:40%; display:inline-block;height:100%;" class="contained">
+              <div id="howarefriends" style="margin: auto; width: 80%;">
+                <button onclick="enterfriendFunction()" id="button4" >How are my friends doing?</button>
+              </div>
+              <div id="twitterfriend" style="display:none">
+                <form id="formy">
+                Twitter Handle:
+                <input type="text" name="handle">
+                <input type="submit" value="Submit" onclick="compareFunction([graphX, graphX], [spellings, spellings], ['rgb(255,0, 0)', 'rgb(0, 255, 0)']  )" id="button5">
+                </form>
+              </div>
+            
+          </div>
+        </div>
           <script>
+            $(document).ready(function(){
+              $("#formy").submit(function(e) {
+                  e.preventDefault();
+              });
+            });
+
 
             var posts= '{{posts | tojson |safe}} ';
             var languages= '{{languages | tojson |safe}} ';
@@ -96,6 +147,7 @@
             console.log("spellingScore", spellings);
             console.log("languagetypes", languageTypes);
 
+            drawPlot(graphX, spellings, 'rgb(0, 0, 255)')
             //drawPlot(graphX, spellings);
 
            function enterfriendFunction() {
@@ -107,15 +159,181 @@
               //document.getElementById("twitterfriend").innerHTML = "You must be kidding! You don't have friends to begin with";
             };
 
+        function compareFunction(graphsX, graphsY, lineColors) {
+            var traces=[];
+            var layout;
+            for(var i=0; i< graphsX.length; i++){
+              var lineObject= getLine(graphsX[i], graphsY[i], lineColors[i]);
+              traces.push(lineObject["data"]);
+              layout=lineObject["layout"];
+            }
+              
+          Plotly.newPlot('myDiv', traces, layout);
+        }
+        //amount speaking english* spelling accuracy
+        function drawOverall(graphH, spellings,languages, lineColor){
+            var graphX= graphH.slice();
+            graphX.pop();
+            graphX.pop();
+            graphX.pop();  
+            graphY=[];  
+            for(var i=0; i< graphX.length; i++) {
+              var avgSpell= (spellings[i]+spellings[i+1]+spellings[i+2])/3;
+              var langEng=0;
+              for( var u=0; u<3; u++){
+                if(languages[i+u]=="English"){
+                  langEng+=1;
+                }
+              }
+              graphY.push(avgSpell*langEng/3);
+            } 
+            var lineObject= getLine(graphX, graphY, lineColor);
+            Plotly.newPlot('myDiv', [lineObject["data"]], lineObject["layout"]);   
+
+        }
+
+        function drawLanguages(graphH, graphY, lineColor){
+          var graphX= graphH.slice();
+            console.log("languages:", graphY);
+
+            function onlyUnique(value, index, self) { 
+                return self.indexOf(value) === index;
+            }
+            var unique = graphY.filter( onlyUnique ); 
+            console.log("english");
+            var traces=[];
+
+            console.log("length graphX", graphX);
+            graphX.pop();
+            graphX.pop();
+            graphX.pop();
+            traces.push({x: graphX, y: [], fill: 'tozeroy'});
+            for(var i=0; i<unique.length-1; i++){
+              traces.push({x: graphX, y: [], fill: 'tonexty'});
+            }
+
+            var languageTypes={};
+            for(var i=0; i< graphY.length-3; i++){
+                var langCount=[];
+                for(var u=0; u< unique.length; u++){
+                  langCount.push(0);
+                }
+                console.log(langCount);
+                for(var u=i; u< i+3; u++){
+                  langCount[unique.indexOf(graphY[i])]+=1;
+                }
+
+                for(var u=0; u< unique.length; u++){
+                  traces[u]["y"].push(langCount[u]);
+                }  
+
+            }  
+            var layout= getLayout(graphX, 3); //linecolor and number of tweets for each area calculation     
+
+
+
+
+            function stackedArea(traces) {
+              for(var i=1; i<traces.length; i++) {
+                for(var j=0; j<(Math.min(traces[i]['y'].length, traces[i-1]['y'].length)); j++) {
+                  traces[i]['y'][j] += traces[i-1]['y'][j];
+                }
+              }
+              return traces;
+            }
+            console.log(traces);
+            Plotly.newPlot('myDiv', stackedArea(traces), layout);
+        }
+
         function drawPlot(graphX, graphY, lineColor){
+          var lineObject= getLine(graphX, graphY, lineColor);
+          Plotly.newPlot('myDiv', [lineObject["data"]], lineObject["layout"]);
+        }
+
+        function getLayout(graphX, height){
+              var layout = {
+          showlegend: false,
+          height: 600,
+          width: 600,
+          xaxis: {
+            showline: true,
+            showgrid: false,
+            showticklabels: true,
+            linecolor: 'rgb(204,204,204)',
+            linewidth: 2,
+            autotick: true,
+            ticks: 'outside',
+            tickcolor: 'rgb(204,204,204)',
+            tickwidth: 2,
+            ticklen: 5,
+            tickfont: {
+              family: 'Arial',
+              size: 12,
+              color: 'rgb(82, 82, 82)'
+            }
+          },
+          yaxis: {
+            showgrid: false,
+            zeroline: true,
+            showline: false,
+            showticklabels: true,
+            range: [0, height]
+          },
+          autosize: false,
+          margin: {
+            autoexpand: false,
+            l: 100,
+            r: 20,
+            t: 100
+          },
+          annotations: [
+            {
+              xref: 'paper',
+              yref: 'paper',
+              x: 0.0,
+              y: 1.05,
+              xanchor: 'left',
+              yanchor: 'bottom',
+              text: '',
+              font:{
+                family: 'Arial',
+                size: 30,
+                color: 'rgb(37,37,37)'
+              },
+              showarrow: false
+            },
+            {
+              xref: 'paper',
+              yref: 'paper',
+              x: 0.5,
+              y: -0.1,
+              xanchor: 'center',
+              yanchor: 'top',
+              text: 'Last '+ (graphX.length + 3) +' posts',
+              showarrow: false,
+              font: {
+                family: 'Arial',
+                size: 20,
+                color: 'rgb(150,150,150)'
+              }
+            }
+          ]
+        };
+        return layout;
+        }
+
+
+
+
+        function getLine(graphX, graphY, lineColor){
           var trace1 = {
               x: graphX,
               y: graphY,
               mode: 'lines+markers',
               line: {
-            color: lineColor,
-            width: 3
-          }
+                color: lineColor,
+                width: 3
+              }
             };
             var layout = {
           showlegend: false,
@@ -175,7 +393,7 @@
               y: -0.1,
               xanchor: 'center',
               yanchor: 'top',
-              text: 'Last'+ graphX.length +'posts',
+              text: 'Last '+ graphX.length +' posts',
               showarrow: false,
               font: {
                 family: 'Arial',
@@ -185,8 +403,10 @@
             }
           ]
         };
+          
             var data = [trace1];
-            Plotly.newPlot('myDiv', data, layout);
+            return {"data": trace1, "layout": layout} //, layout
+            
         }
         </script>
 

@@ -20,10 +20,14 @@ headers = {
     'Content-Type': 'application/json',
     'Ocp-Apim-Subscription-Key': '045f300f774941f986881338f7b42196',
 }
-noTweets=5
+noTweets=10
 
-@app.route('/')
-def main_page():
+@app.route("/")
+def main_start():
+    return render_template('/index.html')
+
+@app.route('/start_twitter',  methods=['POST'])
+def start_twitter():
     #fetch twitter data
 
 
@@ -33,7 +37,10 @@ def main_page():
     api = tweepy.API(auth)
 
     #how to you compare to friends api.friends
-    user= "BecksTSimpson" #"hacksmiths"#
+    user= request.form['twitterHandle']
+    #"BecksTSimpson" #"hacksmiths"#
+
+
     public_tweets = api.user_timeline(id=user,count=noTweets)
     
     #print str(public_tweets[0])
