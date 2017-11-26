@@ -13,12 +13,13 @@
                     background-color:#e5feff;
                     max-width:100%;
                     max-height:100vh;
+                    font-family: Arial, Helvetica, sans-serif;
                 }
                 #main{
                     width:100%;
                     padding-left:35%;
                     padding-right:35%;
-                    padding-top:20vh;
+                    padding-top:10vh;
                     box-sizing:border-box;
                 }
                 img{
@@ -28,30 +29,52 @@
                 }
                 div{
                     text-align:center;
-                    font-size:16px;
+                    font-size:20px;
+                    font-weight:bold;
                     color:black;
                     margin-bottom:1vh;
                 }
                 input{
-                    width:100%;
-                    display:block;
+                    
+                    display:inline-block;
                 }
-                #buttonId{
-                    display:block;
+
+
+                #buttonId {
+                    background-color: #78dfe1; /* Green */
+                    border: none;
+                    color: black;
+                    padding: 15px 32px;
+                    text-align: center;
+                    text-decoration: none;
+                    display: inline-block;
+                    font-size: 20px;
+                    border-radius: 12px;
+                    font-weight:bold;
+                }
+                #sub_heading{
                     width:100%;
+                    padding-left:35%;
+                    padding-right:35%;
+                    margin-bottom:10vh;
+                    color:#757575;
+                }
+                #texty{
+                    width:30%;
+                    height:58.4px;
                 }
           </style>
     </head>
     <body>
         <div id="main">
             <img src="../static/assets/LINGO3.png">
+        </div>
+        <div id="sub_heading"> 
+            The number one platform (at this hackathon!) for non-native english speakers to evaluate their language progression.
+        </div>
         <div>
-        <div>
-            <div>
-                Let's see how your english is progressing...
-            </div>
             <form action="{{ url_for('start_twitter') }}" method="post">             
-                <input type="text" name="twitterHandle" placeholder="@twitterhandle"  >
+                <input type="text" name="twitterHandle" placeholder="@twitterhandle" id="texty" >
                 <input type="submit" value="Submit" id="buttonId">
             </form>
         </div>

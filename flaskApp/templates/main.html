@@ -3,7 +3,7 @@
         <title>Graph page</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        
+        <script src="https://use.fontawesome.com/68e092c9c3.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <!--
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -18,6 +18,9 @@
                 width:100%;
                 height:100vh;
                 display:block;
+                font-weight:bold;
+                font-family: Arial, Helvetica, sans-serif;
+                font-size:20px;
               }
                 button {
                 background-color: white; /* Green */
@@ -27,15 +30,21 @@
                 text-align: center;
                 text-decoration: none;
                 display: inline-block;
-                font-size: 16px;
+                font-size: 20px;
                 border-radius: 12px;
-               
+                font-weight:bold;
                 }
                 #button1{background-color: rgba(0, 0, 255, 0.3);}
                 #button2{background-color: rgba(0, 255, 0, 0.3);}
                 #button3{background-color: rgba(255, 0, 0, 0.3);}
                 .modebar{
                       display: none !important;
+                }
+                #button4{
+                  opacity:0;
+                  transform: translateY(-20px);
+                  transition:0.5s;
+                  /*background-color: rgba(0,0,0,0.3);*/
                 }
                 #header{
                   width:100%;
@@ -56,10 +65,35 @@
                   width:100%;
                   height:10px;
                 }
-                #contained{
+                .contained{
                   margin: 0;
                   padding: 0;
-                  vertical-align:top;
+                  
+                  position:relative;
+                  display:block;
+                }
+                #howarefriends {
+                  
+                  color: rgba(0,0,0,0.3);
+                  text-align:center;
+                }
+
+
+                #howarefriends i{
+                  cursor:pointer;
+                  font-size:200px;
+                }
+                #howarefriends div{
+                  display:inline-block;
+                }
+                #containedInside{
+                 
+                  width:100%;
+                  position:absolute;
+                  top:50%;
+                  left:0;
+                  transform: translateY(-50%);
+
                 }
 
           </style>
@@ -76,7 +110,7 @@
           <img src="../static/assets/LINGO3.png" alt="Logo" >
         </div>
         <div id="mainBody">
-          <div style="width: 45%; display:inline-block;height:100%" class="contained">
+          <div style="width: 50%; display:inline-block;height:100%" class="contained">
             <div id="myDiv">
               <!-- Plotly chart will be drawn inside this DIV -->
             </div>
@@ -89,9 +123,15 @@
                   <span>
               </div>
           </div>
-          <div style="width:40%; display:inline-block;height:100%;" class="contained">
+          <div style="width:50%; float:right;height:100%;" class="contained">
+            <div id="myDiv2">
+              <!-- Plotly chart will be drawn inside this DIV -->
+            </div>
+            <div id="containedInside">
               <div id="howarefriends" style="margin: auto; width: 80%;">
-                <button onclick="enterfriendFunction()" id="button4" >How are my friends doing?</button>
+                <i class="fa fa-question-circle" aria-hidden="true" onclick="enterfriendFunction()"></i>
+                <br>
+                <div id="button4" >How are my friends doing?</div>
               </div>
               <div id="twitterfriend" style="display:none">
                 <form id="formy">
@@ -100,7 +140,7 @@
                 <input type="submit" value="Submit" onclick="compareFunction([graphX, graphX], [spellings, spellings], ['rgb(255,0, 0)', 'rgb(0, 255, 0)']  )" id="button5">
                 </form>
               </div>
-            
+            </div>
           </div>
         </div>
           <script>
@@ -108,8 +148,15 @@
               $("#formy").submit(function(e) {
                   e.preventDefault();
               });
-            });
 
+              $("#howarefriends i").mouseover(function(){
+                $("#button4").css({"opacity": 1, "transform": "translateY(20px)"});
+              });
+              $("#howarefriends i").mouseleave(function(){
+                $("#button4").css({"opacity": 0, "transform": "translateY(-20px)"});
+              });
+            });
+            var celebrities= [["Trump", "realDonaldTrump"], ["Shakira", "shakira"], ["Germany", "TwitterDE"]];
 
             var posts= '{{posts | tojson |safe}} ';
             var languages= '{{languages | tojson |safe}} ';
@@ -172,10 +219,10 @@
         }
         //amount speaking english* spelling accuracy
         function drawOverall(graphH, spellings,languages, lineColor){
-            var graphX= graphH.slice();
-            graphX.pop();
-            graphX.pop();
-            graphX.pop();  
+            var graphX= graphH.slice();//make a copy
+            graphX.unshift();
+            graphX.unshift();
+            graphX.unshift();  
             graphY=[];  
             for(var i=0; i< graphX.length; i++) {
               var avgSpell= (spellings[i]+spellings[i+1]+spellings[i+2])/3;
@@ -188,6 +235,8 @@
               graphY.push(avgSpell*langEng/3);
             } 
             var lineObject= getLine(graphX, graphY, lineColor);
+            
+            
             Plotly.newPlot('myDiv', [lineObject["data"]], lineObject["layout"]);   
 
         }
@@ -200,35 +249,38 @@
                 return self.indexOf(value) === index;
             }
             var unique = graphY.filter( onlyUnique ); 
-            console.log("english");
+            
             var traces=[];
 
             console.log("length graphX", graphX);
-            graphX.pop();
-            graphX.pop();
-            graphX.pop();
-            traces.push({x: graphX, y: [], fill: 'tozeroy'});
-            for(var i=0; i<unique.length-1; i++){
-              traces.push({x: graphX, y: [], fill: 'tonexty'});
+            graphX.unshift();
+            graphX.unshift();
+            graphX.unshift();
+            traces.push({x: graphX, y: [], fill: 'tozeroy', name: unique[0]});
+            for(var i=1; i<unique.length; i++){
+              traces.push({x: graphX, y: [], fill: 'tonexty', name: unique[i]});
             }
 
-            var languageTypes={};
-            for(var i=0; i< graphY.length-3; i++){
+            console.log("all recorded langs",graphY);
+            console.log("unique",unique);
+            for(var i=0; i< graphY.length-2; i++){
                 var langCount=[];
                 for(var u=0; u< unique.length; u++){
                   langCount.push(0);
                 }
-                console.log(langCount);
+                
                 for(var u=i; u< i+3; u++){
-                  langCount[unique.indexOf(graphY[i])]+=1;
+                  langCount[unique.indexOf(graphY[u])]+=1;
                 }
+                console.log(langCount);
 
                 for(var u=0; u< unique.length; u++){
-                  traces[u]["y"].push(langCount[u]);
+                  traces[u]["y"].push(langCount[u]/3);
                 }  
 
             }  
-            var layout= getLayout(graphX, 3); //linecolor and number of tweets for each area calculation     
+            console.log("traces", traces);
+            var layout= getLayout(graphX, 1); //linecolor and number of tweets for each area calculation     
 
 
 
@@ -309,7 +361,7 @@
               y: -0.1,
               xanchor: 'center',
               yanchor: 'top',
-              text: 'Last '+ (graphX.length + 3) +' posts',
+              text: 'Last '+ Math.max.apply(Math, graphX) +' posts',
               showarrow: false,
               font: {
                 family: 'Arial',
@@ -393,7 +445,7 @@
               y: -0.1,
               xanchor: 'center',
               yanchor: 'top',
-              text: 'Last '+ graphX.length +' posts',
+              text: 'Last '+ Math.max.apply(Math, graphX) +' posts',
               showarrow: false,
               font: {
                 family: 'Arial',

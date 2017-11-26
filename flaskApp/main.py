@@ -66,6 +66,11 @@ def start_twitter():
                 words[u]=""
             
         twitterPost= " ".join(w for w in filter(lambda x: x!="", words))
+        twitterPost=twitterPost.replace("\n", " ")
+        twitterPost= twitterPost.rstrip('\n')
+        if(twitterPost.strip()==""):
+            print("STRING IS ONLY SPACES")
+            continue
         #print("twitterPost:  ", twitterPost)
         tweetInformation.append([])
         index= len(tweetInformation)-1
@@ -79,6 +84,7 @@ def start_twitter():
 
 
         #Get sentence language
+        print(" The twitter post trying to send is", twitterPost)
         body={ "documents": [{ "id": "string","text":twitterPost}]}
         data_json = json.dumps(body)    
         try:
@@ -87,12 +93,13 @@ def start_twitter():
             response = conn.getresponse()
             data = response.read()
             data= json.loads(data)
-            #print(data)
+            print("the data is", data)
+
             langType=data["documents"][0]["detectedLanguages"][0]["name"] #langage type
             tweetInformation[index].append(langType)
             conn.close()
         except Exception as e:
-            print("[Errno {0}] {1}".format(e.errno, e.strerror))
+            print("The error is [Errno {0}] {1}".format(e.errno, e.strerror))
 
         #Get spelling score
         wordcount = len(list(filter(lambda x: x!="", words)))
@@ -123,7 +130,7 @@ def start_twitter():
 
 
     print (tweetInformation)
-
+    tweetInformation.reverse()
     #for tweet in public_tweets:
     #    print (tweet.text)
     return render_template('/main.html', spellings= [x[3] for x in tweetInformation], dates= [x[0] for x in tweetInformation], posts= [x[1] for x in tweetInformation], languages= [x[2] for x in tweetInformation])
