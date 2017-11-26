@@ -78,6 +78,10 @@
                   text-align:center;
                 }
 
+                .friendgraph{
+                  display:none;
+                }
+
 
                 #howarefriends i{
                   cursor:pointer;
@@ -117,23 +121,31 @@
       
               <div style="text-align:center">
                   <span style="margin:auto">
-                  <button onclick="drawOverall(graphX, spellings,languages, 'rgba(0, 0, 255, 0.3)')" id="button1">Overall</button>
-                  <button onclick="drawLanguages(graphX, languages, 'rgba(0, 255, 0, 0.3)')" id="button2">Languages</button>
-                  <button onclick="drawPlot(graphX, spellings, 'rgba(255, 0, 0, 0.3)')" id="button3">Spelling</button> 
+                  <button onclick="drawOverall(graphX, spellings,languages, 'rgba(0, 0, 255, 0.3)', 'myDiv')" id="button1">Overall</button>
+                  <button onclick="drawLanguages(graphX, languages, 'rgba(0, 255, 0, 0.3)',  'myDiv')" id="button2">Languages</button>
+                  <button onclick="drawPlot(graphX, spellings, 'rgba(255, 0, 0, 0.3)', 'myDiv')" id="button3">Spelling</button> 
                   <span>
               </div>
           </div>
           <div style="width:50%; float:right;height:100%;" class="contained">
-            <div id="myDiv2">
+            <div id="myDiv2" class="friendgraph">
               <!-- Plotly chart will be drawn inside this DIV -->
             </div>
+              <div style="text-align:center" class="friendgraph">
+                  <span style="margin:auto">
+                  <button onclick="drawOverall(friendGraphX, friendSpellings,friendLanguages, 'rgba(0, 0, 255, 0.3)', 'myDiv2')" id="button1">Overall</button>
+                  <button onclick="drawLanguages(friendGraphX, friendLanguages, 'rgba(0, 255, 0, 0.3)',  'myDiv2')" id="button2">Languages</button>
+                  <button onclick="drawPlot(friendGraphX, friendSpellings, 'rgba(255, 0, 0, 0.3)', 'myDiv2')" id="button3">Spelling</button> 
+                  <span>
+              </div>
             <div id="containedInside">
               <div id="howarefriends" style="margin: auto; width: 80%;">
                 <i class="fa fa-question-circle" aria-hidden="true" onclick="enterfriendFunction()"></i>
                 <br>
-                <div id="button4" >How are my friends doing?</div>
+                <div id="button4" >How do you compare to others?</div>
               </div>
               <div id="twitterfriend" style="display:none">
+
                 <form id="formy">
                 Twitter Handle:
                 <input type="text" name="handle">
@@ -144,6 +156,42 @@
           </div>
         </div>
           <script>
+            var friendTweetData=[];
+            var friendPosts;
+            var friendLanguages;
+            var friendSpellings;
+            var friendDates;
+            var friendGraphX=[];
+            $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+
+              function friendButtonClicked(name2){
+                console.log("friendbutton clicked");
+                console.log(name2);
+                $.getJSON($SCRIPT_ROOT + '/get_tweets', {
+                  name : name2
+                }, function(data) {
+                  //for returns tweetdata
+                  console.log("returned is",data);
+                  //friendTweetData=JSON.parse(data);
+                  console.log(friendTweetData);
+                  friendTweetData=data;
+                  friendPosts=friendTweetData["posts"];
+                  friendLanguages=friendTweetData["languages"];
+                  friendDates=friendTweetData["dates"];
+                  friendSpellings=friendTweetData["spellings"];
+
+                  friendGraphX=[];
+                  for(var i=0; i< friendPosts.length; i++){
+                      friendGraphX.push(i);
+                  }
+                  $('.friendgraph').css({"display":"block"});
+                  $('#containedInside').css({"display":"none"});
+                  drawOverall(friendGraphX, friendSpellings, friendLanguages, 'rgb(0, 0, 255)' , "myDiv2");                
+                });
+
+
+              };
+
             $(document).ready(function(){
               $("#formy").submit(function(e) {
                   e.preventDefault();
@@ -155,6 +203,8 @@
               $("#howarefriends i").mouseleave(function(){
                 $("#button4").css({"opacity": 0, "transform": "translateY(-20px)"});
               });
+
+
             });
             var celebrities= [["Trump", "realDonaldTrump"], ["Shakira", "shakira"], ["Germany", "TwitterDE"]];
 
@@ -194,8 +244,10 @@
             console.log("spellingScore", spellings);
             console.log("languagetypes", languageTypes);
 
-            drawPlot(graphX, spellings, 'rgb(0, 0, 255)')
+            drawOverall(graphX, spellings, languages, 'rgb(0, 0, 255)', "myDiv")
             //drawPlot(graphX, spellings);
+
+
 
            function enterfriendFunction() {
               document.getElementById("twitterfriend").style.display = "block";
@@ -203,6 +255,20 @@
               document.getElementById("twitterfriend").style.width = "50%";
               document.getElementById("howarefriends").style.display = "none";
               document.getElementById("twitterfriend").style.padding = "10px";
+
+              console.log('{{user}}');
+              $.getJSON($SCRIPT_ROOT + '/get_friends', {
+                name : '{{user}}'
+              }, function(data) {
+                //for all friends create button
+                var colors= ["rgba(255, 0, 0, 0.3)","rgba(0,255, 0, 0.3)","rgba(0,0,255, 0.3)"];
+                for(var i=0; i< data.length;i++){
+                  $("#twitterfriend").prepend("<button onclick= friendButtonClicked('"+data[i]+"') class='friendButton' value='"+data[i]+"' style='background-color:"+ colors[i%3] +"'>"+data[i]+"</button");
+                }
+
+                console.log(data);
+              });
+
               //document.getElementById("twitterfriend").innerHTML = "You must be kidding! You don't have friends to begin with";
             };
 
@@ -218,7 +284,7 @@
           Plotly.newPlot('myDiv', traces, layout);
         }
         //amount speaking english* spelling accuracy
-        function drawOverall(graphH, spellings,languages, lineColor){
+        function drawOverall(graphH, spellings,languages, lineColor, divName){
             var graphX= graphH.slice();//make a copy
             graphX.unshift();
             graphX.unshift();
@@ -237,11 +303,11 @@
             var lineObject= getLine(graphX, graphY, lineColor);
             
             
-            Plotly.newPlot('myDiv', [lineObject["data"]], lineObject["layout"]);   
+            Plotly.newPlot(divName, [lineObject["data"]], lineObject["layout"]);   
 
         }
 
-        function drawLanguages(graphH, graphY, lineColor){
+        function drawLanguages(graphH, graphY, lineColor, divName){
           var graphX= graphH.slice();
             console.log("languages:", graphY);
 
@@ -294,12 +360,12 @@
               return traces;
             }
             console.log(traces);
-            Plotly.newPlot('myDiv', stackedArea(traces), layout);
+            Plotly.newPlot(divName, stackedArea(traces), layout);
         }
 
-        function drawPlot(graphX, graphY, lineColor){
+        function drawPlot(graphX, graphY, lineColor, divName){
           var lineObject= getLine(graphX, graphY, lineColor);
-          Plotly.newPlot('myDiv', [lineObject["data"]], lineObject["layout"]);
+          Plotly.newPlot(divName, [lineObject["data"]], lineObject["layout"]);
         }
 
         function getLayout(graphX, height){
