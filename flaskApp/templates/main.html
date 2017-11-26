@@ -39,13 +39,25 @@
                 <center><img src="../static/assets/LINGO3.png" alt="Logo" style="width:330px;height:202px;"></center>
             </div>
         </div>
+        <div style="margin: auto; width: 50%;">
         <div id="myDiv"><!-- Plotly chart will be drawn inside this DIV --></div>
     
-            <div style="padding-left:15%">
+            <div style="margin: auto; width: 55%;">
                 <button onclick="drawPlot(graphX, spellings, 'rgb(255, 0, 0)')" id="button1">Overall</button>
                 <button onclick="drawPlot(graphX, spellings, 'rgb(0, 255, 0)')" id="button2">Grammar</button>
                 <button onclick="drawPlot(graphX, spellings, 'rgb(0, 0, 255)')" id="button3">Spelling</button> 
             </div>
+            <div id="howarefriends" style="margin: auto; width: 40%;">
+              <button onclick="enterfriendFunction()" id="button4" >How are my friends doing?</button>
+            </div>
+            <div id="twitterfriend" style="display:none">
+              <form >
+              Twitter Handle:
+              <input type="text" name="handle">
+              <input type="submit" value="Submit" onclick="compareFunction()" id="button5">
+              </form>
+            </div>
+          </div>
           <script>
 
             var posts= '{{posts | tojson |safe}} ';
@@ -86,8 +98,17 @@
 
             //drawPlot(graphX, spellings);
 
+           function enterfriendFunction() {
+              document.getElementById("twitterfriend").style.display = "block";
+              document.getElementById("twitterfriend").style.margin = "auto";
+              document.getElementById("twitterfriend").style.width = "50%";
+              document.getElementById("howarefriends").style.display = "none";
+              document.getElementById("twitterfriend").style.padding = "10px";
+              //document.getElementById("twitterfriend").innerHTML = "You must be kidding! You don't have friends to begin with";
+            };
+
         function drawPlot(graphX, graphY, lineColor){
-                        var trace1 = {
+          var trace1 = {
               x: graphX,
               y: graphY,
               mode: 'lines+markers',
@@ -154,7 +175,7 @@
               y: -0.1,
               xanchor: 'center',
               yanchor: 'top',
-              text: 'Last thirty posts',
+              text: 'Last'+ graphX.length +'posts',
               showarrow: false,
               font: {
                 family: 'Arial',
