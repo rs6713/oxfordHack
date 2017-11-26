@@ -54,6 +54,7 @@
                   top:10vh;
                   background-color: rgba(0,0,0,0.3);
                   display:none;
+                  z-index:100;
                 }
                 #button1{background-color: rgba(0, 0, 255, 0.3);}
                 #button2{background-color: rgba(0, 255, 0, 0.3);}
@@ -478,7 +479,7 @@
             zeroline: true,
             showline: false,
             showticklabels: true,
-            range: [0, height]
+            range: [0, 1]
           },
           autosize: false,
           margin: {
@@ -562,7 +563,7 @@
             zeroline: true,
             showline: false,
             showticklabels: true,
-            range: [0, Math.max.apply(Math, graphY)]
+            range: [0, 1]
           },
           autosize: false,
           margin: {
