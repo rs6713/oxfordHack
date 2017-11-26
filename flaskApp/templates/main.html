@@ -22,6 +22,18 @@
                 font-family: Arial, Helvetica, sans-serif;
                 font-size:20px;
               }
+                .button {
+                background-color: white; /* Green */
+                border: none;
+                color: black;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 20px;
+                border-radius: 12px;
+                font-weight:bold;
+                }
                 button {
                 background-color: white; /* Green */
                 border: none;
@@ -33,6 +45,15 @@
                 font-size: 20px;
                 border-radius: 12px;
                 font-weight:bold;
+                }
+                #back{
+                  display:block;
+                  position:absolute;
+                  right:5%;
+                  width:auto;
+                  top:10vh;
+                  background-color: rgba(0,0,0,0.3);
+                  display:none;
                 }
                 #button1{background-color: rgba(0, 0, 255, 0.3);}
                 #button2{background-color: rgba(0, 255, 0, 0.3);}
@@ -82,6 +103,14 @@
                   display:none;
                 }
 
+                #twitterfriend{
+                  text-align:center;
+                }
+                #twitterfriend button{
+                  display:inline-block;
+                  margin-bottom:5px;
+                }
+
 
                 #howarefriends i{
                   cursor:pointer;
@@ -98,6 +127,29 @@
                   left:0;
                   transform: translateY(-50%);
 
+                }
+
+                #buttonId {
+                    background-color: #78dfe1; /* Green */
+                    border: none;
+                    color: black;
+                    padding: 15px 32px;
+                    width:100%;
+                    text-align: center;
+                    text-decoration: none;
+                    display: block;
+                    font-size: 20px;
+                    border-radius: 12px;
+                    font-weight:bold;
+                    
+                }
+
+                #texty{
+                    display:block;
+                    width:100%;
+                    font-size:20px;
+                    font-weight:bold;
+                    height:58.4px;
                 }
 
           </style>
@@ -128,6 +180,7 @@
               </div>
           </div>
           <div style="width:50%; float:right;height:100%;" class="contained">
+            <span class="button" id="back">Back</span>
             <div id="myDiv2" class="friendgraph">
               <!-- Plotly chart will be drawn inside this DIV -->
             </div>
@@ -137,6 +190,7 @@
                   <button onclick="drawLanguages(friendGraphX, friendLanguages, 'rgba(0, 255, 0, 0.3)',  'myDiv2')" id="button2">Languages</button>
                   <button onclick="drawPlot(friendGraphX, friendSpellings, 'rgba(255, 0, 0, 0.3)', 'myDiv2')" id="button3">Spelling</button> 
                   <span>
+                  
               </div>
             <div id="containedInside">
               <div id="howarefriends" style="margin: auto; width: 80%;">
@@ -145,12 +199,20 @@
                 <div id="button4" >How do you compare to others?</div>
               </div>
               <div id="twitterfriend" style="display:none">
-
+                <!-- method="post" action="{{ url_for('start_twitter') }}" -->
+                <br><br>
+                <form  id="formy2">             
+                    Compare Anybody
+                    <input type="text" name="twitterHandle" placeholder="@twitterhandle" id="texty" >
+                    <input type="submit" value="Submit" id="buttonId" onClick="friendButtonClicked('')">
+                </form>
+<!--
                 <form id="formy">
                 Twitter Handle:
                 <input type="text" name="handle">
                 <input type="submit" value="Submit" onclick="compareFunction([graphX, graphX], [spellings, spellings], ['rgb(255,0, 0)', 'rgb(0, 255, 0)']  )" id="button5">
                 </form>
+                -->
               </div>
             </div>
           </div>
@@ -165,6 +227,10 @@
             $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 
               function friendButtonClicked(name2){
+                if(name2==""){
+                  name2=$('#texty').val();
+                }
+                $('#texty').val("");
                 console.log("friendbutton clicked");
                 console.log(name2);
                 $.getJSON($SCRIPT_ROOT + '/get_tweets', {
@@ -186,6 +252,7 @@
                   }
                   $('.friendgraph').css({"display":"block"});
                   $('#containedInside').css({"display":"none"});
+                  $('#back').css({"display":"block"});
                   drawOverall(friendGraphX, friendSpellings, friendLanguages, 'rgb(0, 0, 255)' , "myDiv2");                
                 });
 
@@ -193,7 +260,16 @@
               };
 
             $(document).ready(function(){
+              $("#back").click(function(){
+                $('.friendgraph').css({"display":"none"});
+                $('#containedInside').css({"display":"block"});
+                $("#back").css({"display": "none"});
+              });
+
               $("#formy").submit(function(e) {
+                  e.preventDefault();
+              });
+              $("#formy2").submit(function(e) {
                   e.preventDefault();
               });
 
@@ -265,6 +341,13 @@
                 for(var i=0; i< data.length;i++){
                   $("#twitterfriend").prepend("<button onclick= friendButtonClicked('"+data[i]+"') class='friendButton' value='"+data[i]+"' style='background-color:"+ colors[i%3] +"'>"+data[i]+"</button");
                 }
+                $("#twitterfriend").prepend("Followers<br>");
+
+                $("#twitterfriend").append("<br>Celebrities<br>");
+                for(var i=0; i< celebrities.length;i++){
+                  $("#twitterfriend").append("<button onclick= friendButtonClicked('"+celebrities[i][1]+"') class='friendButton' value='"+celebrities[i][1]+"' style='background-color:"+ colors[i%3] +"'>"+celebrities[i][0]+"</button");
+                }
+                
 
                 console.log(data);
               });

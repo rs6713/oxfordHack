@@ -21,7 +21,7 @@ headers = {
     'Content-Type': 'application/json',
     'Ocp-Apim-Subscription-Key': '045f300f774941f986881338f7b42196',
 }
-noTweets=10
+noTweets=20
 
 @app.route("/")
 def main_start():
